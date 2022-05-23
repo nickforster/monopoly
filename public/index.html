@@ -8,6 +8,28 @@
     <script src="client.js" defer></script>
 </head>
 <body>
-<h1>Monopoly multiplayer</h1>
+<div id="start" class="">
+    <h1>Monopoly multiplayer</h1>
+    <input type="text" name="player-name" id="player-name" placeholder="Player 1">
+    <input type="text" name="room-name" id="room-name" placeholder="Room">
+    <input type="submit" name="join-room" id="join-room" value="Join room">
+    <img src="images/policeMan.png" alt="An image of the policeman">
+    <img src="images/monopolyMan.png" alt="An image of the monopoly man">
+    <div id="error-empty-inputs" class="hidden">
+        <p>Bitte geben sie Raum- und Spielername ein</p>
+    </div>
+    <div id="error-full-room" class="hidden">
+        <p>Dieser Raum ist bereits voll</p>
+    </div>
+</div>
+<div id="lobby" class="hidden">
+    <h4></h4>
+    <div id="players"></div>
+    <button>Start Game</button>
+    <button>Leave</button>
+</div>
+<div id="game" class="hidden">
+    <canvas id="canvas"></canvas>
+</div>
 </body>
 </html>
