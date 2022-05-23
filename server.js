@@ -27,14 +27,8 @@ io.on('connection', (socket) => {
      * Join a room
      */
     socket.on('join-room', (name, id, room) => {
-        if (rooms[room] === undefined) {
-            rooms[room] = {}
-            rooms[room][id] = name
-            players[id] = room
-            socket.join(room)
-            status[room] = 'open'
-            io.in(room).emit('player-count-changed', Object.values(rooms[room]), Object.keys(rooms[room]))
-        } else if (Object.keys(rooms[room]).length < MAX_PLAYERS && status[room] !== 'playing') {
+        if (rooms[room] === undefined) rooms[room] = {}
+        if (Object.keys(rooms[room]).length < MAX_PLAYERS && status[room] !== 'playing') {
             rooms[room][id] = name
             players[id] = room
             socket.join(room)
