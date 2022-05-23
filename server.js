@@ -14,6 +14,8 @@ app.use(express.static(path.join(__dirname, 'public')))
 let rooms = {}
 //hold all players with their rooms
 let players = {}
+// stores the status of the rooms (open / playing)
+let status = {}
 //amount of players allowed per room
 const MAX_PLAYERS = 4
 
@@ -30,12 +32,14 @@ io.on('connection', (socket) => {
             rooms[room][id] = name
             players[id] = room
             socket.join(room)
-            io.in(room).emit('player-count-changed', Object.values(rooms[room]))
-        } else if (Object.keys(rooms[room]).length < MAX_PLAYERS) {
+            status[room] = 'open'
+            io.in(room).emit('player-count-changed', Object.values(rooms[room]), Object.keys(rooms[room]))
+        } else if (Object.keys(rooms[room]).length < MAX_PLAYERS && status[room] !== 'playing') {
             rooms[room][id] = name
             players[id] = room
             socket.join(room)
-            io.in(room).emit('player-count-changed', Object.values(rooms[room]))
+            status[room] = 'open'
+            io.in(room).emit('player-count-changed', Object.values(rooms[room]), Object.keys(rooms[room]))
         } else {
             io.in(id).emit('room-full')
         }
@@ -48,6 +52,15 @@ io.on('connection', (socket) => {
         console.log('player left')
         socket.leave(players[id])
         leaveRoom(id)
+    })
+
+    /**
+     * Game has been started
+     */
+    socket.on('start-game', (room) => {
+        status[room] = 'playing'
+        // Start the game, also with three.js
+        io.in(room).emit('start-game')
     })
 
     /**
@@ -65,7 +78,7 @@ function leaveRoom(id) {
     delete players[id]
     if (rooms[room] !== undefined && rooms[room][id] !== undefined) {
         delete rooms[room][id]
-        io.in(room).emit('player-count-changed', Object.values(rooms[room]))
+        io.in(room).emit('player-count-changed', Object.values(rooms[room]), Object.keys(rooms[room]))
     }
 }
 
