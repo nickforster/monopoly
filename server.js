@@ -30,31 +30,43 @@ io.on('connection', (socket) => {
             rooms[room][id] = name
             players[id] = room
             socket.join(room)
+            io.in(room).emit('player-count-changed', Object.values(rooms[room]))
         } else if (Object.keys(rooms[room]).length < MAX_PLAYERS) {
             rooms[room][id] = name
             players[id] = room
             socket.join(room)
+            io.in(room).emit('player-count-changed', Object.values(rooms[room]))
         } else {
             io.in(id).emit('room-full')
         }
     })
 
+    /**
+     * Socket leaves a room
+     */
+    socket.on('player-left', (id) => {
+        console.log('player left')
+        socket.leave(players[id])
+        leaveRoom(id)
+    })
 
     /**
      * Socket disconnects
      */
     socket.on('disconnect', () => {
-        leaveRoom(socket)
+        socket.leave(players[socket.id])
+        leaveRoom(socket.id)
     })
 })
 
-function leaveRoom(socket) {
-    const room = players[socket.id]
-    delete players[socket.id]
-    delete rooms[room][socket.id]
-    socket.leave(room)
-    console.log(players)
-    console.log(rooms)
+// socket gets deleted from the rooms and players variable
+function leaveRoom(id) {
+    const room = players[id]
+    delete players[id]
+    if (rooms[room] !== undefined && rooms[room][id] !== undefined) {
+        delete rooms[room][id]
+        io.in(room).emit('player-count-changed', Object.values(rooms[room]))
+    }
 }
 
 

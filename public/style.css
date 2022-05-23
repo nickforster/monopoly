@@ -6,6 +6,9 @@ body {
     display: none !important;
 }
 
+/*
+  Start screen
+ */
 #start {
     display: flex;
     align-items: center;
@@ -25,4 +28,15 @@ img:nth-of-type(1) {
 img:nth-of-type(2) {
     top: 3rem;
     right: 1rem;
+}
+
+/*
+    Lobby screen
+ */
+#lobby {
+    background-color: lightblue;
+    padding: .5rem 2rem 2rem;
+    position: absolute;
+    top: 25%;
+    left: 40%;
 }
