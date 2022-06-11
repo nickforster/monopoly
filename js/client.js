@@ -1,9 +1,9 @@
-const socket = io()
+let socket = io();
 
 // Different screens of the website
 const start = document.getElementById('start')
 const lobby = document.getElementById('lobby')
-const game = document.getElementById('game')
+
 
 /**
  * Start screen
@@ -22,28 +22,25 @@ const errorFullRoom = document.getElementById('error-full-room')
  * if neither of the inputs are empty the user joins the room
  * else an error message is displayed
  */
-joinRoom.addEventListener('click', () => {
+joinRoom.addEventListener('click', function () {
     if (playerName.value !== '' && roomName.value !== '') {
-        socket.emit('join-room', playerName.value, socket.id, roomName.value)
         start.classList.add('hidden')
-        lobby.classList.remove('hidden')
-        game.classList.remove('hidden')
+        socket.emit('join-room', playerName.value, socket.id, roomName.value)
+        loadWorld()
     } else {
         errorEmptyInputs.classList.remove('hidden');
     }
 })
 
 /*
- * When the room is full the lobby and the game aren't displayed
- * But an error message is displayed
+ * Show errors when the room is full
  */
 socket.on('room-full', () => {
     start.classList.remove('hidden')
-    lobby.classList.add('hidden')
-    game.classList.add('hidden')
     errorEmptyInputs.classList.add('hidden');
     errorFullRoom.classList.remove('hidden')
 })
+
 
 /**
  * Lobby screen
@@ -64,8 +61,6 @@ const startGame = document.getElementById('start-game')
  */
 leaveRoomLobby.addEventListener('click', () => {
     start.classList.remove('hidden')
-    lobby.classList.add('hidden')
-    game.classList.add('hidden')
     socket.emit('player-left', socket.id)
 })
 
@@ -98,9 +93,11 @@ socket.on('player-count-changed', (playersInRoom, socketIdsInRoom) => {
 })
 
 /*
- * The game starts
+ * The game starts and adds the players
  * the lobby isn't shown anymore
  */
-socket.on('start-game', () => {
+socket.on('start-game', (roomData) => {
+    console.log('start-game')
     lobby.classList.add('hidden')
+    createPlayers(roomData)
 })

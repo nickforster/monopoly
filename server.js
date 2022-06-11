@@ -1,39 +1,38 @@
-const path = require('path')
-const http = require('http')
-const express = require('express')
-const socketIo = require('socket.io')
+let app = require('express')();
+let http = require('http').Server(app);
+let io = require('socket.io')(http);
+let world = require('./js/server_world');
 
-const app = express()
-const server = http.createServer((app))
-const io = socketIo(server)
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html');
+});
+app.get('/style.css', (req, res) => {
+    res.sendFile(__dirname + '/style.css');
+});
+app.get('/js/client_world.js', (req, res) => {
+    res.sendFile(__dirname + '/js/client_world.js');
+});
+app.get('/js/client.js', (req, res) => {
+    res.sendFile(__dirname + '/js/client.js');
+});
+//images
+app.get('/images/monopolyMan.png', (req, res) => {
+    res.sendFile(__dirname + '/images/monopolyMan.png');
+});
+app.get('/images/policeMan.png', (req, res) => {
+    res.sendFile(__dirname + '/images/policeMan.png');
+});
 
-// set static folder
-app.use(express.static(path.join(__dirname, 'public')))
-
-// Object which holds all rooms with the socket ids and player names
-let rooms = {}
-//hold all players with their rooms
-let players = {}
-// stores the status of the rooms (open / playing)
-let status = {}
-//amount of players allowed per room
-const MAX_PLAYERS = 4
-
-// run when client connects
 io.on('connection', (socket) => {
-    console.log("New socket joined")
+    console.log('a user connected');
 
     /**
-     * Join a room
+     * Join a Room
      */
     socket.on('join-room', (name, id, room) => {
-        if (rooms[room] === undefined) rooms[room] = {}
-        if (Object.keys(rooms[room]).length < MAX_PLAYERS && status[room] !== 'playing') {
-            rooms[room][id] = name
-            players[id] = room
+        if(world.joinRoom(name, id, room)) {
             socket.join(room)
-            status[room] = 'open'
-            io.in(room).emit('player-count-changed', Object.values(rooms[room]), Object.keys(rooms[room]))
+            io.in(room).emit('player-count-changed', Object.values(world.rooms[room]), Object.keys(world.rooms[room]))
         } else {
             io.in(id).emit('room-full')
         }
@@ -44,39 +43,33 @@ io.on('connection', (socket) => {
      */
     socket.on('player-left', (id) => {
         console.log('player left')
-        socket.leave(players[id])
-        leaveRoom(id)
+        socket.leave(world.players[id])
+        world.leaveRoom(id)
     })
 
     /**
      * Game has been started
      */
     socket.on('start-game', (room) => {
-        status[room] = 'playing'
-        // Start the game, also with three.js
-        io.in(room).emit('start-game')
+        world.startGame(room)
+
+        io.in(room).emit('start-game', world.rooms[room])
     })
 
     /**
      * Socket disconnects
      */
     socket.on('disconnect', () => {
-        socket.leave(players[socket.id])
-        leaveRoom(socket.id)
+        console.log('user disconnected');
+        socket.leave(world.players[socket.id])
+        world.leaveRoom(socket.id)
     })
-})
+});
 
-// socket gets deleted from the rooms and players variable
-function leaveRoom(id) {
-    const room = players[id]
-    delete players[id]
-    if (rooms[room] !== undefined && rooms[room][id] !== undefined) {
-        delete rooms[room][id]
-        io.in(room).emit('player-count-changed', Object.values(rooms[room]), Object.keys(rooms[room]))
-    }
-}
+// Handle environment changes
+let port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
+let ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
 
-
-// Port and listening of the server
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+http.listen(port, ip_address, () => {
+    console.log("Listening on " + ip_address + ", server_port " + port);
+});

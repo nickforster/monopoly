@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html>
+<head lang="en">
     <meta charset="UTF-8">
     <title>Monopoly multiplayer</title>
-    <link rel="stylesheet" href="style.css">
+    <link href="style.css" rel="stylesheet">
     <script src="/socket.io/socket.io.js" defer></script>
-    <script src="client.js" defer></script>
+    <script src="//threejs.org/build/three.js"></script>
+    <script src="/js/client_world.js" defer></script>
+    <script src="js/client.js" defer></script>
 </head>
 <body>
 <div id="start" class="">
@@ -22,15 +24,15 @@
         <p>Dieser Raum ist bereits voll</p>
     </div>
 </div>
-<div id="lobby" class="hidden">
+
+<div id="lobby" class="">
     <h2 id="lobby-title"></h2>
     <div id="players-list-lobby"></div>
     <br>
     <button id="start-game">Start Game</button>
     <button id="leave-room-lobby">Leave</button>
 </div>
-<div id="game" class="hidden">
-    <canvas id="canvas"></canvas>
-</div>
+
+<div id="container"></div>
 </body>
 </html>
