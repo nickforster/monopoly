@@ -15,6 +15,9 @@ app.get('/js/client_world.js', (req, res) => {
 app.get('/js/client.js', (req, res) => {
     res.sendFile(__dirname + '/js/client.js');
 });
+app.get('/data/fields.json', (req, res) => {
+    res.sendFile(__dirname + '/data/fields.json');
+});
 //images
 app.get('/images/monopolyMan.png', (req, res) => {
     res.sendFile(__dirname + '/images/monopolyMan.png');

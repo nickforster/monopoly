@@ -41,6 +41,7 @@ function leaveRoom(id) {
 
         // io.in(room).emit('player-count-changed', Object.values(rooms[room]), Object.keys(rooms[room]))
         // TODO call method for player count changed
+        // TODO if room is empty delete it
     }
 }
 
