@@ -83,28 +83,39 @@ function createPlayers(roomData) {
             "id": Object.keys(roomData)[i],
             "name": Object.values(roomData)[i],
             "positionID": 0,
-            "places": []
+            "places": [],
+            "money": 1500,
+            "outOfJail": 0
         }
 
         players[i] = player;
     }
-    updatePlayerPositions(roomData)
+    updatePlayerData(roomData)
+}
+
+/*
+ * Calls all methods to update the Data of the players
+ * @param roomData
+ */
+function updatePlayerData(roomData) {
+    updatePositions(roomData)
+    testCollision(roomData)
+    updateMoney()
+    updateCards()
 }
 
 /*
  * updates the positions of all players based on their positionId and the fields.json file data
  * @param roomData
  */
-function updatePlayerPositions(roomData) {
+function updatePositions(roomData) {
     for (let i = 0; i < Object.keys(roomData).length; i++) {
         player = players[i]
         let playerPositionField = player["positionID"]
         let newPositions = positions[playerPositionField]
 
         objects[i].position.set(newPositions["x"], 0, newPositions["z"])
-
     }
-    testCollision(roomData)
 }
 
 /*
@@ -151,5 +162,102 @@ function testCollision(roomData) {
     for (let i = 0; i < Math.min(collisions.length, Object.keys(roomData).length); i++) {
         let newPosition = shifts[i]
         objects[collisions[i]].position.set(objects[collisions[i]].position.x + newPosition["x"], 0, objects[collisions[i]].position.z + newPosition["z"])
+    }
+}
+
+/*
+ * updates the money of each player based on the players array
+ */
+function updateMoney() {
+    const subElements = document.getElementsByClassName("sub-element-player-list")
+    const moneyContainer = document.getElementById('money-container')
+
+    for (let i = 0; i < subElements.length; i++) {
+        subElements[i].innerHTML = players[i]['money']
+    }
+
+    for (let i = 0; i < subElements.length; i++) {
+        if (players[i]['id'] === socket.id){
+            moneyContainer.innerText = players[i]['money']
+        }
+    }
+
+}
+
+/*
+ * updates the cards based on the players array
+ */
+function updateCards() {
+    // TODO update the cards of each player (top left and bottom) read description
+    /*
+    get big and small images of the cards
+
+    for each player:
+        get the array with all places ids
+        for each placesIds:
+            get the image path (based on the id)
+            create an image tag
+            set the image path in the image tag
+            -probably set the height/width of the image
+
+        if (players[i]['id'] === socket.id):
+           get the array with all places ids
+           for each placesIds:
+                get the image path (based on the id)
+                create an image tag
+                set the image path in the image tag
+                -probably set the height/width of the image
+
+     make the style of the images (the bottom ones: hover: transform up, maybe scale up)
+     */
+}
+
+/*
+ * Loads stuff like names, money and cards
+ * @param roomData
+ */
+function loadWorldEnvironments(roomData) {
+    const playerListGame = document.getElementById('players-list-game')
+    const moneyContainer = document.getElementById('money-container')
+    let maxLength = 0;
+    for (let i = 0; i < Object.keys(roomData).length; i++) {
+        if (Object.values(roomData)[i].length > maxLength) {
+            maxLength = Object.values(roomData)[i].length
+        }
+    }
+    // creates the list of items on the top left corner
+    for (let i = 0; i < Object.keys(roomData).length; i++) {
+        const element = document.createElement('div')
+        const subElement = document.createElement('div')
+        element.innerHTML = Object.values(roomData)[i]
+        subElement.innerHTML = players[i]['money']
+        element.classList.add('element-player-list')
+        subElement.classList.add('sub-element-player-list')
+        element.appendChild(subElement)
+        playerListGame.appendChild(element)
+    }
+    createOffset()
+
+    // inserts the amount of money into the label on the bottom left
+    for (let i = 0; i < Object.keys(roomData).length; i++) {
+        if (players[i]['id'] === socket.id){
+            moneyContainer.innerText = players[i]['money']
+        }
+    }
+}
+
+/*
+ * Creates an offset for the subElements to align them to the right of the names
+ */
+function createOffset() {
+    const playerListGame = document.getElementById('players-list-game')
+    const subElements = document.getElementsByClassName("sub-element-player-list")
+    const elements = document.getElementsByClassName("element-player-list")
+    let size = elements[0].clientHeight
+    for (let i = 0; i < subElements.length; i++) {
+        subElements[i].style.left = playerListGame.clientWidth + "px"
+        subElements[i].style.top = (size * i) + (size - subElements[i].clientHeight) / 2 + 'px'
+        subElements[i].style.display = 'none'
+        console.log((size * i) + (size - subElements[i].clientHeight) / 2 + 'px')
     }
 }

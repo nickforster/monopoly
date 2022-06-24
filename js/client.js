@@ -100,4 +100,5 @@ socket.on('start-game', (roomData) => {
     console.log('start-game')
     lobby.classList.add('hidden')
     createPlayers(roomData)
+    loadWorldEnvironments(roomData)
 })

@@ -14,7 +14,7 @@ html, body {
 #start {
     background-color: lightblue;
     position: absolute;
-    z-index: 10;
+    z-index: 15;
     display: flex;
     align-items: center;
     flex-direction: column;
@@ -43,7 +43,7 @@ img:nth-of-type(2) {
 #lobby {
     background-color: lightblue;
     position: absolute;
-    z-index: 5;
+    z-index: 10;
     padding: .5rem 2rem 2rem;
     top: 25%;
     left: 40%;
@@ -52,10 +52,50 @@ img:nth-of-type(2) {
 /*
     Game screen
  */
+#game {
+    z-index: 5;
+}
+
 #container {
     position: absolute;
     z-index: 0;
     top: 0;
     left: 0;
     outline: none;
+}
+
+#players-list-game{
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    top: 0;
+    left: 0;
+    z-index: 2;
+}
+
+.element-player-list{
+    padding: .5rem;
+    background-color: lightblue;
+    border: 1px solid black;
+}
+
+.sub-element-player-list{
+    position: absolute;
+    display: block;
+    top: 0;
+}
+
+.element-player-list:hover > .sub-element-player-list {
+    display: block !important;
+}
+
+#money-container{
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    background-color: lightblue;
+    color: black;
+    border: 1px solid black;
+    z-index: 2;
+    padding: .5rem;
 }
