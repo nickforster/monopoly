@@ -2,7 +2,9 @@ let container, scene, camera, renderer, plane;
 let player;
 let players = [];
 let objects = [];
-let positions;
+let positions = [];
+let diceValue = 0;
+let playerId = 0;
 
 const fetchData = async () => {
     try {
@@ -60,7 +62,6 @@ let loadWorld = function () {
      */
     function tick() {
         requestAnimationFrame(tick);
-
         renderer.clear();
         renderer.render(scene, camera);
     }
@@ -104,6 +105,91 @@ function updatePlayerData(roomData) {
     updateCards()
 }
 
+
+function movePlayer(diceValue, playerId){
+    setDiceValue(diceValue)
+    setPlayerId(playerId)
+    startmove = true
+}
+
+function setDiceValue(newDiceValue){
+    diceValue = newDiceValue
+}
+
+function getDiceValue(){
+    return diceValue
+}
+
+function setPlayerId(newPlayerId){
+    playerId = newPlayerId
+}
+
+function getPlayerId(){
+    return playerId
+}
+
+let tickCnt = 0
+let startmove = false
+let currentPlayerLocation = 0
+let currentCords = []
+let currentDiceValue = 0
+let currentPlayer = []
+let cnt = 0
+function ticks(){
+    requestAnimationFrame(ticks)
+    if(tickCnt % 1 === 0){
+      if(startmove === true){
+          currentPlayer = players[getPlayerId()]
+          currentPlayerLocation = currentPlayer["positionID"]
+          currentCords = positions[currentPlayerLocation]
+          if(currentPlayerLocation + getDiceValue() > 44){
+              while((currentPlayerLocation + getDiceValue()) !== 44){
+                  currentDiceValue ++
+                  setDiceValue(getDiceValue() - 1)
+              }
+          }
+          if((currentCords.x !== positions[currentPlayerLocation + getDiceValue()].x) || (currentCords.z !== positions[currentPlayerLocation + getDiceValue()].z)){
+              if(cnt !== 100){
+                  if(cnt === 1){
+                      console.log(currentCords, currentPlayerLocation,positions[0])
+                  }
+                  if(currentCords !== positions[currentPlayerLocation + 1]){
+                      if(currentPlayerLocation < 11){
+                          currentCords.x += 0.01
+                      }
+                      if((10 < currentPlayerLocation )  && (currentPlayerLocation < 20)){
+                          currentCords.z += 0.01
+                      }
+                      if(((19 < currentPlayerLocation) && (currentPlayerLocation < 31)) || currentPlayerLocation <= -10){
+                          currentCords.x -= 0.01
+                      }
+                      if(currentPlayerLocation > 30){
+                          currentCords.z -= 0.01
+                      }
+                      objects[getPlayerId()].position.set(currentCords.x, 0, currentCords.z)
+                      cnt ++
+                  }
+              } else {
+                  if (currentPlayerLocation == 43) {
+                      currentPlayer["positionID"] = 0
+                      console.log(currentCords,currentPlayerLocation,positions[0])
+                      setDiceValue(currentDiceValue)
+                  } else {
+                      currentPlayer["positionID"] ++
+                      setDiceValue(getDiceValue()-1)
+                  }
+
+                  cnt = 0
+              }
+          } else {
+              startmove = false
+              console.log(getDiceValue()," ", currentCords)
+          }
+      }
+    }
+    tickCnt ++
+}
+ticks()
 /*
  * updates the positions of all players based on their positionId and the fields.json file data
  * @param roomData
